@@ -1,0 +1,808 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="정준기의 개발공간 (dev.joongi)">
+    <title>hexo블로그(tranquilpeak)에 구글애드센스(adsense) 및 광고 설치 - 정준기의 개발공간 (dev.joongi)</title>
+    <meta name="author" content="jung joongi">
+    
+    
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/rss2.xml">
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"jung joongi","sameAs":["https://github.com/jungjoongi","https://facebook.com/joongi.jung.kr","mailto:dev.joongi@gmail.com"],"image":"profile.jpg"},"articleBody":"요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.이에대한 과정을 나누어보려고 한다.\n근황최근 프로젝트가 하나 끝나고 얼마전부터 sm운영을 하고있었다. 그전까지는 조금 바빠서 블로그에 손을 델수가 없었다.글을 쓰고싶었지만 집에가면 쉬고싶고 역시 그냥 쉬고싶은 것이었다.\n이제 다시 블로그에 투자를 하기위해서 미루고 미루었던 광고게재하기위한 작업을 다시 시작했다.처음에 너무나 귀찮았던 일이라.. 1달여 넘게 미루었던 일이었는데 더이상 마루게된다면 글쓰는것도 미루게될 것 같았다.드디어 블로그 소스를 까보고 어디위치에 넣어볼까 고민을 하던끝에 좌측에 광고를 달기로 결심했다.\n광고위치 선정 고려사항\n블로그에 광고를 게재하기 위해 많은것을 고려하게 되었다.\n1. 가독성을 방해하면 안된다.2. 컨텐츠 외에 장소를 확보해야한다.3. 모바일 환경에서는 광고를 보여주지 않는다.4. 한번의 삽입으로 끝내야한다\n이와같은 이유는 모두 컨텐츠를 보호하기 위함이었다.첫째도 둘째도 컨텐츠를 방해하지 않기위한 방향으로 잡았기 때문이다.예컨데 우리나라 인터넷 신문 사이트만 들어가도 광고로 도배가 되어있는것을 볼 수가 있다. 정말 스트레스 받는다.도무지 기사내용을 확인할 수가 없다. 그래서 생각해낸 방법은 블로그에 컨텐츠 영역을 나누는 것이었다.\n작업그런데 문제가 하나 더 생겼다. 내 블로그는 post에 최적화 되어있는 블로그이기때문에 약간 손을봐야 했던 것이었다.tranquilpeak 테마를 사용해본 사람들은 알것이다. 딱 post에 최적화가 되어있고 글에 집중할수 있도록 되어있기 때문이었다.그래서 어쩔수없이 테마를 손보기로 하였다.\n테마는 좌측에 광고가 들어갈만큼 나누어주었다.post.ejs파일을 건드려 post를 2영역으로 나누어주었고 좌측에는 광고 우측에는 포스트가 들어가도록 설정해주었다.좌측 광고는 fixed를 걸어 항상 고정이 되게하였고 컨텐츠는 스크롤하는 방향에 맞추어 기존과 같이 기능이 동작하도록 하였다.\n광고는 3개만\n1. 쿠팡광고 1개2. 쿠팡광고 1개3. 구글애드센스 1개\n그래도 배너형식으로 넣어보니 꾀 블로그가 깔끔하게 보이기 시작했다.여기서 고려해야 할 사항들이 몇가지 생겨났다.\n광고대응 작업모바일페이지와 화면이 작아졌을때를 대비하는 것이었다.나는 여기서 resize()함수를 사용하여 최소 아이패드 해상도까지만 광고가 보이게하였고 그 이하로 해상도가 내려간다면 과감하게 광고를 지우고 post의 사이즈는 원래대로 복귀시키는 것이었다.\n예제코드를 첨부한다.123456789101112$(window).resize(function ()&#123;    var width_size = window.outerWidth;        if (width_size &lt;= 760) &#123;        $(\"#ads\").css(\"display\",\"none\");        $(\"#main-content\").attr(\"style\",\"\");    &#125;    if (width_size &gt; 760) &#123;        $(\"#ads\").css(\"display\",\"block\");        $(\"#main-content\").css(\"margin-left\",\"270px\");    &#125;&#125;)\n물론 나의 DOM트리 상황에 맞는 attribute 설정을 하였지만 이것은 자신의 소스코드 입맛에 맞게 사용하면 될것같다.또 google Adsense는 반응형으로 사이즈가 동적으로 생겨난다.그래서 스크립트가 실행이 되기전 사용자의 스크롤이동으로 인한 깨짐을 최소한으로 방지하고자 로딩 이미지등 사전작업을 실시하였다.\n방법은 간단하다.\n1. 로딩이미지를 띄운다2. 스크롤바 기능을 중지시킨다.3. window.onload 함수를 사용하여 이미지 제거/스크롤 작동\n질문이 있다면 댓글남겨주세요. 답변드리겠습니다.\n","dateCreated":"2018-12-05T15:23:01+09:00","dateModified":"2020-11-26T07:05:00+09:00","datePublished":"2018-12-05T15:23:01+09:00","description":"요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.이에대한 과정을 나누어보려고 한다.","headline":"hexo블로그(tranquilpeak)에 구글애드센스(adsense) 및 광고 설치","image":[["adsense-title.jpg"],["adsense-title.jpg"]],"mainEntityOfPage":{"@type":"WebPage","@id":"https://jungjoongi.com/2018/12/05/hexo-adsense/"},"publisher":{"@type":"Organization","name":"jung joongi","sameAs":["https://github.com/jungjoongi","https://facebook.com/joongi.jung.kr","mailto:dev.joongi@gmail.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://jungjoongi.com/2018/12/05/hexo-adsense/","keywords":"hexo, tranquilpeak, adsense","thumbnailUrl":["adsense-title.jpg"]}</script>
+    <meta name="description" content="요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.이에대한 과정을 나누어보려고 한다.">
+<meta name="keywords" content="hexo,tranquilpeak,adsense">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="hexo블로그(tranquilpeak)에 구글애드센스(adsense) 및 광고 설치">
+<meta property="og:url" content="https://jungjoongi.com/2018/12/05/hexo-adsense/index.html">
+<meta property="og:site_name" content="정준기의 개발공간 (dev.joongi)">
+<meta property="og:description" content="요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.이에대한 과정을 나누어보려고 한다.">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-11-25T22:05:00.904Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hexo블로그(tranquilpeak)에 구글애드센스(adsense) 및 광고 설치">
+<meta name="twitter:description" content="요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.이에대한 과정을 나누어보려고 한다.">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/assets/images/profile.jpg">
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/2018/12/05/hexo-adsense/adsense-title.jpg">
+        <meta class="swiftype" name="image" data-type="enum" content="https://jungjoongi.com/2018/12/05/hexo-adsense/adsense-title.jpg">
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/2018/12/05/hexo-adsense/adsense-title.jpg">
+        <meta class="swiftype" name="image" data-type="enum" content="https://jungjoongi.com/2018/12/05/hexo-adsense/adsense-title.jpg">
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-4ngztga3idioznqo1pyan9ha38eeiz0lhqbk1ebqdbsjhfqov4shnvjdpuos.min.css">
+    <!--STYLES END-->
+    
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-116953031-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    
+    <link rel="canonical" href="https://jungjoongi.com/2018/12/05/hexo-adsense/">
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a class="header-title-link" href="/ ">정준기의 개발공간 (dev.joongi)</a>
+    </div>
+    
+        
+            <a class="header-right-picture " href="#about">
+        
+        
+            <img class="header-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a href="/#about">
+                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+                </a>
+                <h4 class="sidebar-profile-name">jung joongi</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>MyKtApp</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/ " title="Home">
+                    
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-categories" title="Categories">
+                    
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-tags" title="Tags">
+                    
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-archives" title="Archives">
+                    
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/profile/" title="About">
+                    
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="https://github.com/jungjoongi" target="_blank" rel="external nofollow noopener noreferrer" title="GitHub">
+                    
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="https://facebook.com/joongi.jung.kr" target="_blank" rel="external nofollow noopener noreferrer" title="Facebook">
+                    
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="mailto:dev.joongi@gmail.com" target="_blank" rel="external nofollow noopener noreferrer" title="Mail">
+                    
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/rss2.xml" title="RSS">
+                    
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+        <div class="post-header-cover
+                    text-left
+                    " style="background-image:url('/2018/12/05/hexo-adsense/adsense-title.jpg');" data-behavior="5">
+            
+                <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            hexo블로그(tranquilpeak)에 구글애드센스(adsense) 및 광고 설치
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-12-05T15:23:01+09:00">
+	
+		    Dec 05, 2018
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/hexo/">hexo</a>
+
+
+    
+</div>
+
+    
+</div>
+
+            
+        </div>
+
+            <div id="main" data-behavior="5" class="hasCover
+                        hasCoverMetaIn
+                        ">
+                
+<style>
+    #loading {
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        position: fixed;
+        display: block;
+        background-color: #fff;
+        z-index: 99;
+        text-align: center;
+    }
+
+    html body {
+        overflow: hidden;
+        height: 100%
+    }
+
+    #loading-image {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+    }
+    #loading-text {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        font-style: bold;
+    }
+    ol {
+        padding: 0 0 0 20px;
+        list-style: disc;
+    }
+    #coupang-layer-pop {
+        position: fixed;
+        width:386px;
+        height:345px;
+        padding:16px;
+        background-color:white;
+        border: 1px dashed#c7c7c7;
+        top:50%;
+        left: 50%;
+        transform:translate(-50%, -50%);
+        display:none;
+    }
+    #ads {
+        width:360px;
+        margin-top:30px;
+        position:absolute;
+        top:30px;
+    }
+    #content-list {
+        font-size:14px;
+        margin-bottom:20px;
+    }
+    #coupang-layer-button {
+        position: absolute;
+        right:30px;
+        bottom:10px;
+    }
+</style>
+
+<div id="loading"><img id="loading-image" src="/assets/images/loading.gif" alt="Loading..."><span id="loading-text">페이지가 로딩중입니다. 잠시만 기다려주세요</span></div>
+<article class="post">
+    
+
+    
+    <!-- 2020-02-18 쿠팡 광고제거
+    <div id="coupang-layer-pop">
+        <iframe src="https://ads-partners.coupang.com/iframe/search-bar?id=19092917192714204211009791-l1&type=l1&trackingCode=AF9416635" width="383px" height="75" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-0" src="https://coupa.ng/bgdTAw" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-1" src="https://coupa.ng/bgdTbp" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-2" src="https://coupa.ng/bgd0rL" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <button id="coupang-layer-button">close</button>
+    </div> 
+    -->
+    <div class="post-content markdown" style="margin:auto;max-width:1360px;">
+
+        <div id="ads" class="ad-area">
+            
+            <!-- hexo-side1 -->
+            <ins class="adsbygoogle" style="display:block;width:340px;" data-ad-client="ca-pub-5379974693765383" data-ad-slot="6166524771" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+            <div id="content-list">
+                <h3 id="table-of-contents"></h3><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#근황"><span class="toc-text">근황</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#광고위치-선정-고려사항"><span class="toc-text">광고위치 선정 고려사항</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#작업"><span class="toc-text">작업</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#광고는-3개만"><span class="toc-text">광고는 3개만</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#광고대응-작업"><span class="toc-text">광고대응 작업</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#방법은-간단하다"><span class="toc-text">방법은 간단하다.</span></a></li></ol></li></ol>
+            </div>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <div id="lastAds"></div>
+        </div>
+
+        <div id="main-content" class="main-content-wrap" style="margin-right:360px;">
+            <p>요즘 일이 바빠서 블로그 작성을 소홀히 하였지만 드디어 구글애드센스와 쿠팡광고를 블로그에 설치하였다.<br>이에대한 과정을 나누어보려고 한다.<br><a id="more"></a><br><!-- toc --></p>
+<h2 id="근황"><a href="#근황" class="headerlink" title="근황"></a>근황</h2><p>최근 프로젝트가 하나 끝나고 얼마전부터 sm운영을 하고있었다. 그전까지는 조금 바빠서 블로그에 손을 델수가 없었다.<br>글을 쓰고싶었지만 집에가면 쉬고싶고 역시 그냥 쉬고싶은 것이었다.</p>
+<p>이제 다시 블로그에 투자를 하기위해서 미루고 미루었던 광고게재하기위한 작업을 다시 시작했다.<br>처음에 너무나 귀찮았던 일이라.. 1달여 넘게 미루었던 일이었는데 더이상 마루게된다면 글쓰는것도 미루게될 것 같았다.<br>드디어 블로그 소스를 까보고 어디위치에 넣어볼까 고민을 하던끝에 좌측에 광고를 달기로 결심했다.</p>
+<h2 id="광고위치-선정-고려사항"><a href="#광고위치-선정-고려사항" class="headerlink" title="광고위치 선정 고려사항"></a>광고위치 선정 고려사항</h2><hr>
+<p>블로그에 광고를 게재하기 위해 많은것을 고려하게 되었다.</p>
+<p><strong>1. 가독성을 방해하면 안된다.</strong><br><strong>2. 컨텐츠 외에 장소를 확보해야한다.</strong><br><strong>3. 모바일 환경에서는 광고를 보여주지 않는다.</strong><br><strong>4. 한번의 삽입으로 끝내야한다</strong></p>
+<p>이와같은 이유는 모두 컨텐츠를 보호하기 위함이었다.<br>첫째도 둘째도 컨텐츠를 방해하지 않기위한 방향으로 잡았기 때문이다.<br>예컨데 우리나라 인터넷 신문 사이트만 들어가도 광고로 도배가 되어있는것을 볼 수가 있다. 정말 스트레스 받는다.<br>도무지 기사내용을 확인할 수가 없다. 그래서 생각해낸 방법은 블로그에 컨텐츠 영역을 나누는 것이었다.</p>
+<h2 id="작업"><a href="#작업" class="headerlink" title="작업"></a>작업</h2><p>그런데 문제가 하나 더 생겼다. 내 블로그는 post에 최적화 되어있는 블로그이기때문에 약간 손을봐야 했던 것이었다.<br><code>tranquilpeak</code> 테마를 사용해본 사람들은 알것이다. 딱 post에 최적화가 되어있고 글에 집중할수 있도록 되어있기 때문이었다.<br>그래서 어쩔수없이 테마를 손보기로 하였다.</p>
+<p>테마는 좌측에 광고가 들어갈만큼 나누어주었다.<br><code>post.ejs</code>파일을 건드려 post를 2영역으로 나누어주었고 좌측에는 광고 우측에는 포스트가 들어가도록 설정해주었다.<br>좌측 광고는 <code>fixed</code>를 걸어 항상 고정이 되게하였고 컨텐츠는 스크롤하는 방향에 맞추어 기존과 같이 기능이 동작하도록 하였다.</p>
+<h3 id="광고는-3개만"><a href="#광고는-3개만" class="headerlink" title="광고는 3개만"></a>광고는 3개만</h3><hr>
+<p><strong>1. 쿠팡광고 1개</strong><br><strong>2. 쿠팡광고 1개</strong><br><strong>3. 구글애드센스 1개</strong></p>
+<p>그래도 배너형식으로 넣어보니 꾀 블로그가 깔끔하게 보이기 시작했다.<br>여기서 고려해야 할 사항들이 몇가지 생겨났다.</p>
+<h2 id="광고대응-작업"><a href="#광고대응-작업" class="headerlink" title="광고대응 작업"></a>광고대응 작업</h2><p>모바일페이지와 화면이 작아졌을때를 대비하는 것이었다.<br>나는 여기서 <code>resize()</code>함수를 사용하여 최소 아이패드 해상도까지만 광고가 보이게하였고 그 이하로 해상도가 내려간다면 과감하게 광고를 지우고 post의 사이즈는 원래대로 복귀시키는 것이었다.</p>
+<p>예제코드를 첨부한다.<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="built_in">window</span>).resize(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> width_size = <span class="built_in">window</span>.outerWidth;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (width_size &lt;= <span class="number">760</span>) &#123;</span><br><span class="line">        $(<span class="string">"#ads"</span>).css(<span class="string">"display"</span>,<span class="string">"none"</span>);</span><br><span class="line">        $(<span class="string">"#main-content"</span>).attr(<span class="string">"style"</span>,<span class="string">""</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (width_size &gt; <span class="number">760</span>) &#123;</span><br><span class="line">        $(<span class="string">"#ads"</span>).css(<span class="string">"display"</span>,<span class="string">"block"</span>);</span><br><span class="line">        $(<span class="string">"#main-content"</span>).css(<span class="string">"margin-left"</span>,<span class="string">"270px"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>물론 나의 DOM트리 상황에 맞는 attribute 설정을 하였지만 이것은 자신의 소스코드 입맛에 맞게 사용하면 될것같다.<br>또 <code>google Adsense</code>는 반응형으로 사이즈가 동적으로 생겨난다.<br>그래서 스크립트가 실행이 되기전 사용자의 스크롤이동으로 인한 깨짐을 최소한으로 방지하고자 로딩 이미지등 사전작업을 실시하였다.</p>
+<h4 id="방법은-간단하다"><a href="#방법은-간단하다" class="headerlink" title="방법은 간단하다."></a>방법은 간단하다.</h4><hr>
+<p><strong>1. 로딩이미지를 띄운다</strong><br><strong>2. 스크롤바 기능을 중지시킨다.</strong><br><strong>3. window.onload 함수를 사용하여 이미지 제거/스크롤 작동</strong></p>
+<p>질문이 있다면 댓글남겨주세요. 답변드리겠습니다.</p>
+
+            
+
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap" style="max-width:960px">
+        
+        <div class="post-footer-tags">
+            <span class="text-color-light text-small">
+                TAGGED IN</span><br>
+            
+    <a class="tag tag--primary tag--small t-link" href="/tags/adsense/">adsense</a> <a class="tag tag--primary tag--small t-link" href="/tags/hexo/">hexo</a> <a class="tag tag--primary tag--small t-link" href="/tags/tranquilpeak/">tranquilpeak</a>
+
+        </div>
+        
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/12/13/aws-ec2-timezone/" data-tooltip="AWS EC2 시간(timezone) / Locale 변경하기" aria-label="PREVIOUS: AWS EC2 시간(timezone) / Locale 변경하기">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/30/disqus-korean-setting/" data-tooltip="디스커스 Disqus 한글 세팅을 해보자 편법(?)으로" aria-label="NEXT: 디스커스 Disqus 한글 세팅을 해보자 편법(?)으로">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Facebook" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Twitter" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Google+" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="Table of Contents">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- hexo-text -->
+        <ins class="adsbygoogle" style="display:block;margin-bottom: 10px;" data-ad-client="ca-pub-5379974693765383" data-ad-slot="8538682456" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+        
+        
+        <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+        
+    </div>
+</article>
+<script>
+    
+
+    var product;
+
+    var adsFactory = {
+        makeAds: function () {
+            var arrPul = new Array();
+
+            arrPul.push(["bebe", "https://coupa.ng/bgd96W"])
+            arrPul.push(["macbook1", "https://coupa.ng/bgdTAw"])
+            arrPul.push(["water", "https://coupa.ng/bgd97B"])
+            arrPul.push(["rice", "https://coupa.ng/bgd97L"])
+            arrPul.push(["acon", "https://coupa.ng/bgd99x"])
+            arrPul.push(["zd980", "https://coupa.ng/bgd991"])
+            arrPul.push(["macbook2", "https://coupa.ng/bgdTbp"])
+            arrPul.push(["gasubgi", "https://coupa.ng/bgd986"])
+            arrPul.push(["chaison", "https://coupa.ng/bgd99s"])
+            arrPul.push(["gx50", "https://coupa.ng/bgd99M"])
+            arrPul.push(["miband", "https://coupa.ng/bgd99d"])
+            arrPul.push(["airfry", "https://coupa.ng/bgd98G"])
+            arrPul.push(["macbook3", "https://coupa.ng/bgd0rL"])
+            arrPul.push(["joggi", "https://coupa.ng/bgd99C"])
+            arrPul.push(["gx5bk", "https://coupa.ng/bgeaab"])
+            this.shuffle(arrPul)
+            product = arrPul;
+        },
+        shuffle: function (arr) {
+            var j, x, i;
+            for (i = arr.length; i; i -= 1) {
+                j = Math.floor(Math.random() * i);
+                x = arr[i - 1];
+                arr[i - 1] = arr[j];
+                arr[j] = x;
+            }
+        },
+        popAds: function (arr) {
+            if (arr.length < 1) {
+                this.makeAds()
+                return -1;
+            }
+            return arr.pop(0)[1];
+        }
+    }
+
+    //adsFactory.makeAds(); 2020-02-18 쿠팡 광고제거
+
+    
+
+    window.onload = function () {
+        document.getElementById('loading').remove();
+    /* 2020-02-18 쿠팡 광고제거
+        for (i = 0; i < 3; i++) {
+            result = adsFactory.popAds(product)
+            if (result != -1) {
+                $("#coupang-" + i).attr("src", result)
+            }
+        }
+        setInterval(async function () {
+            var result;
+            for (i = 0; i < 3; i++) {
+                result = adsFactory.popAds(product)
+                if (result != -1) {
+                    $("#coupang-" + i).attr("src", result)
+
+                } else {
+                    i--
+                }
+            }
+        }, 10000)
+        */
+        $("#post-footer").css("margin-left", $("#main-content").offset().left)
+        $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+        
+        /* 2020-02-18 쿠팡 광고제거
+        $("#coupang-layer-button").click(function() {
+            $("#coupang-layer-pop").hide();  
+        })
+        */
+        $('html, body').css({
+            'overflow': 'auto',
+            'height': '100%'
+        });
+
+        var cursor;
+        var corverHeight = 0;
+
+        if (window.outerWidth <= 760) {
+            $("#ads").css("display", "none");
+            $("#main-content").attr("style", "");
+        }
+        if (window.outerWidth > 760) {
+            $("#ads").css("display", "block");
+            /* 2020-02-18 쿠팡 광고제거
+            setTimeout (function() {
+                $("#coupang-layer-pop").show();
+            }, 20000)
+            */
+        }
+
+        $(window).resize(function () {
+            $("#post-footer").css("margin-left", $("#main-content").offset().left)
+            var width_size = window.outerWidth;
+
+            if (width_size <= 760) {
+                $("#ads").css("display", "none");
+                $("#main-content").attr("style", "");
+            }
+            if (width_size > 760) {
+                $("#ads").css("display", "block");
+                $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+                $("#main-content").css("margin-right", "360px");
+            }
+
+        })
+        $(document).on('scroll', function () {
+            if ($(".post-header-cover").length < 1) {
+                if ($(window).scrollTop() > $(".post-header").offset().top) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $(".post-header").outerHeight(true)) {
+                        $("#ads").css("position", "fixed")
+                        $("#ads").css("top", "30px")
+                        
+                    }
+                    if ($(window).scrollTop() > $("#post-footer").offset().top -$("#ads").outerHeight(true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - $(".post-header").outerHeight(true) + 30
+                        $("#ads").css("position", "absolute")
+                        $("#ads").css("top", cursor)
+                    }
+                }
+                if ($(window).scrollTop() < $(".post-header").offset().top) {
+                    $("#ads").css("position", "absolute")
+                }
+                
+            } else {
+                
+                corverHeight = $(".post-header-cover").outerHeight(true)
+                if ($(window).scrollTop() > $("#main-content").offset().top - 30) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $("#ads").outerHeight(true)) {
+                        $("#ads").css("position", "fixed")
+                        $("#ads").css("top", "30px")
+                        
+                    }
+                    if ($(window).scrollTop() + 30 > $("#post-footer").offset().top - $("#ads").outerHeight(
+                            true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - corverHeight
+                        $("#ads").css("position", "absolute")
+                        $("#ads").css("top", cursor)
+                    }
+                }
+                if ($(window).scrollTop() < $("#main-content").offset().top - 30) {
+                    $("#ads").css("position", "absolute")
+                }
+            }
+        });
+    };
+</script>
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2020 jung joongi. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/12/13/aws-ec2-timezone/" data-tooltip="AWS EC2 시간(timezone) / Locale 변경하기" aria-label="PREVIOUS: AWS EC2 시간(timezone) / Locale 변경하기">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/30/disqus-korean-setting/" data-tooltip="디스커스 Disqus 한글 세팅을 해보자 편법(?)으로" aria-label="NEXT: 디스커스 Disqus 한글 세팅을 해보자 편법(?)으로">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Facebook" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Twitter" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/12/05/hexo-adsense/" title="Share on Google+" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="Table of Contents">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <i id="btn-close-shareoptions" class="fa fa-times"></i>
+    <ul class="share-options">
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/12/05/hexo-adsense/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/12/05/hexo-adsense/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/12/05/hexo-adsense/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+            
+        </div>
+        
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+        
+            <h4 id="about-card-name">jung joongi</h4>
+        
+            <div id="about-card-bio"><p>MyKtApp</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br>
+                <p>JAVA Backend Developer</p>
+
+            </div>
+        
+        
+            <div id="about-card-location">
+                <i class="fa fa-map-marker-alt"></i>
+                <br>
+                South.Korea
+            </div>
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/covers.jpg');"></div>
+        <!--SCRIPTS-->
+<script src="/assets/js/script-lkmi689h93e7n0qmtywpvpdyypvmncje7ggb5fnctvpae6wx6ssq60g6bsdf.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'https://jungjoongi.com/2018/12/05/hexo-adsense/';
+                 
+                    this.page.identifier = '2018/12/05/hexo-adsense/';
+                 
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'jungjoongi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+    </body>
+</html>

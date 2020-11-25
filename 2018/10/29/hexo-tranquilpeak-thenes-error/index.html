@@ -1,0 +1,809 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="정준기의 개발공간 (dev.joongi)">
+    <title>hexo tranquilpeak 테마 build 오류 발견 및 해결 - 정준기의 개발공간 (dev.joongi)</title>
+    <meta name="author" content="jung joongi">
+    
+    
+    
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="/rss2.xml">
+    
+    <script type="application/ld+json">{"@context":"http://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"jung joongi","sameAs":["https://github.com/jungjoongi","https://facebook.com/joongi.jung.kr","mailto:dev.joongi@gmail.com"],"image":"profile.jpg"},"articleBody":"tranquilpeak 테마의 빌드이슈를 공개합니다.약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오류가 발생했다는 사실을 깨달아 해결점과 함께 그 과정을 공개합니다.\n#기본적인 세팅 &amp; 참고일단 기본적인 세팅은 tranquilpeak제작자인 LouisBarranqueiro의 git을 참고하면 도큐먼트 문서가 있는데 보고 따라하는것이 가장 간편하다.그외에 한글로 된 설명이 필요하다면 태태태의 개발공간을 참고해도 좋다. 잘 정리되어 있다.\n# build? 그리고 오류일단 이 테마는 build를 내부적으로 해야 작동하는 테마이다.이전에 다른 테마를 사용할때에는 그냥 적용하면 됐었지만, css나 js등 테마의 자원을 변경했을때에는 별도의 build작업이 필요하다.그런데!! 문제가 생긴다. build가 되지 않는것이다.\n일단 도큐먼트 문서를 보자.\n도큐먼트 문서중 자원변경시 해야할일외부 라이브러리를 추가/삭제할때에는 npm install 을 통해서 모듈을 설치/삭제를 해주어야한다. 그렇지만 이것이 빌드는 아니다.LouisBarranqueiro 는 테마를 수정했을때에 hexo s명령어를 실행해 local환경에서 서버를 띄어보게 하고 npm run start 명령어를 실행하여 변경된 모듈 &amp; 자원들을 임시저장소로 옮겨 로컬환경에서 로드시키도록 했다.\n그렇지만 아래와 같은 오류를 반환할 뿐 아무일도 일어나지 않는다.명령프롬프트에서 반환하는 값1234567891011121314151617181920npm ERR! code ELIFECYCLEnpm ERR! errno 1npm ERR! hexo-theme-tranquilpeak@3.0.1 grunt: `./node_modules/grunt-cli/bin/grunt \"default\"`npm ERR! Exit status 1npm ERR!npm ERR! Failed at the hexo-theme-tranquilpeak@3.0.1 grunt script.npm ERR! This is probably not a problem with npm. There is likely additional logging output above.npm ERR! A complete log of this run can be found in:npm ERR!     C:\\Users\\name\\scoop\\persist\\nodejs\\cache\\_logs\\2018-10-29T08_21_56_667Z-debug.lognpm ERR! code ELIFECYCLEnpm ERR! errno 1npm ERR! hexo-theme-tranquilpeak@3.0.1 start: `npm run grunt -- default`npm ERR! Exit status 1npm ERR!npm ERR! Failed at the hexo-theme-tranquilpeak@3.0.1 start script.npm ERR! This is probably not a problem with npm. There is likely additional logging output above.npm ERR! A complete log of this run can be found in:npm ERR!     C:\\Users\\name\\scoop\\persist\\nodejs\\cache\\_logs\\2018-10-29T08_21_56_709Z-debug.log\n짧은 영어탓인가 구글링을 해도 소득은 많이 않았다. 그래서 소스를 하나씩 까보기 시작했다.내가 npm run start 를 하게되면 package.json 파일의 내장스크립트가 구동하도록 로직이 짜여져있다.\n1234567891011121314151617181920&#123;  \"name\": \"hexo-theme-tranquilpeak\",  \"version\": \"3.0.1\",  \"description\": \"A gorgeous responsive theme for Hexo blog framework\",  \"main\": \"Gruntfile.js\",  \"scripts\": &#123;    \"start\": \"npm run grunt -- default\",    \"build\": \"npm run prod\",    \"prod\": \"npm run grunt -- buildProd\",    \"grunt\": \"./node_modules/grunt-cli/bin/grunt\",    \"lint\": \"./node_modules/eslint/bin/eslint.js\",    \"test\": \"echo \\\"Error: no test specified\\\" &amp;&amp; exit 1\"  &#125;,  \"repository\": &#123;    \"type\": \"git\",    \"url\": \"https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak.git\"  &#125;,.... [생략]&#125;\nnpm run xxx라는 명령을 실행하면 상위에 미리 짜여져있는 로직이 실행이 되는것이다.npm run start명령을 하면 아마도(?) Gruntfile.js가 메인이되어 내부적 호출을 하는 스크립트들이 실행이 되는것같았다.결국에는 npm run start가 npm run grunt 명령과 같은 셈인것 같았다.그리고 이미 흐름을 보면 알겠지만 nodejs로 구동이 되고있는것을 알수가있다.\n./node_modules/grunt-cli/bin/grunt의 내부소스를 봐도 js소스로 구성되어있다. (확장자가 js는 아니지만 js로 되어있다.)\n#해결방법방금 본것과 같이 nodejs가 관여하고있는 라이브러리 및 자원들이다.nodejs로 서버를 실행해본 사람들은 알겠지만 실행을 하기 위해서는 앞에 node명령어가 필요하다는 것을 알고있을 것이다.그래서 이와같이 해결해봅니다.\npackage.json 9번째줄 node명령어 추가1234567891011121314151617181920&#123;  \"name\": \"hexo-theme-tranquilpeak\",  \"version\": \"3.0.1\",  \"description\": \"A gorgeous responsive theme for Hexo blog framework\",  \"main\": \"Gruntfile.js\",  \"scripts\": &#123;    \"start\": \"npm run grunt -- default\",    \"build\": \"npm run prod\",    \"prod\": \"npm run grunt -- buildProd\",    \"grunt\": \"node ./node_modules/grunt-cli/bin/grunt\",    \"lint\": \"./node_modules/eslint/bin/eslint.js\",    \"test\": \"echo \\\"Error: no test specified\\\" &amp;&amp; exit 1\"  &#125;,  \"repository\": &#123;    \"type\": \"git\",    \"url\": \"https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak.git\"  &#125;,.... [생략]&#125;\npackage.json파일에 짜여져있는 로직에서 grunt파일을 실행할때 node를 통해 실행하도록 하는것이다.이렇게 변경후 저장한 다음 npm run start명령을 실행하면 자연스레 실행이 되는것을 확인할 수 있을 것이다.그리고 local서버에서는 실시간으로 적용되기때문에 확인을 할 수가 있고 자원을 변경한 후에는 npm run prod명령을 통하여 테마 폴더로 배포가 될것이다.그러면 root폴더로 이동하여 hexo generate -d 명령을 수행하면 public폴더로 배포가 되며 블로그에 정상 배포가 되는것을 확인할 수 있을것이다.\n#이슈제기 및 마무리나는 이것을 발견하여  tranquilpeak제작자인 LouisBarranqueiro의 git로가서 이슈를 제기하였다.테마 제작자인 LouisBarranqueiro에게 이슈제기\n짧은 영어지만 이슈를 제기하니 1-2일 이내로 답변이 왔다. 아마 다음버전 배포할때에는 수정이 되어 배포가 될 것같다.이런 이슈들을 접하다보니 나도모르게 많이 배워가는것 같다.\n언젠가 나도 라이브러리나 오픈소스를 배포할날이 올까? 아직 멀었지만 그런 날을 기대하며 개발을 하러간다.읽어주셔 감사합니다.\n","dateCreated":"2018-10-29T16:46:10+09:00","dateModified":"2020-11-26T07:05:00+09:00","datePublished":"2018-10-29T16:46:10+09:00","description":"tranquilpeak 테마의 빌드이슈를 공개합니다.약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오류가 발생했다는 사실을 깨달아 해결점과 함께 그 과정을 공개합니다.","headline":"hexo tranquilpeak 테마 build 오류 발견 및 해결","image":[["tranquilpeak-01.jpg"],[null]],"mainEntityOfPage":{"@type":"WebPage","@id":"https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/"},"publisher":{"@type":"Organization","name":"jung joongi","sameAs":["https://github.com/jungjoongi","https://facebook.com/joongi.jung.kr","mailto:dev.joongi@gmail.com"],"image":"profile.jpg","logo":{"@type":"ImageObject","url":"profile.jpg"}},"url":"https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/","keywords":"hexo, tranquilpeak","thumbnailUrl":["tranquilpeak-01.jpg"]}</script>
+    <meta name="description" content="tranquilpeak 테마의 빌드이슈를 공개합니다.약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오">
+<meta name="keywords" content="hexo,tranquilpeak">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="hexo tranquilpeak 테마 build 오류 발견 및 해결">
+<meta property="og:url" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/index.html">
+<meta property="og:site_name" content="정준기의 개발공간 (dev.joongi)">
+<meta property="og:description" content="tranquilpeak 테마의 빌드이슈를 공개합니다.약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/tranquilpeak-01.jpg">
+<meta property="og:image" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/tranquilpeak-02.jpg">
+<meta property="og:updated_time" content="2020-11-25T22:05:00.916Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hexo tranquilpeak 테마 build 오류 발견 및 해결">
+<meta name="twitter:description" content="tranquilpeak 테마의 빌드이슈를 공개합니다.약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오">
+<meta name="twitter:image" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/tranquilpeak-01.jpg">
+    
+    
+        
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/assets/images/profile.jpg">
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/tranquilpeak-01.jpg">
+        <meta class="swiftype" name="image" data-type="enum" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/tranquilpeak-01.jpg">
+    
+    
+        <meta property="og:image" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/">
+        <meta class="swiftype" name="image" data-type="enum" content="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/">
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/assets/css/style-4ngztga3idioznqo1pyan9ha38eeiz0lhqbk1ebqdbsjhfqov4shnvjdpuos.min.css">
+    <!--STYLES END-->
+    
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-116953031-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    
+    <link rel="canonical" href="https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/">
+</head>
+
+    <body>
+        <div id="blog">
+            <!-- Define author's picture -->
+
+
+    
+        
+            
+        
+    
+
+<header id="header" data-behavior="5">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <div class="header-title">
+        <a class="header-title-link" href="/ ">정준기의 개발공간 (dev.joongi)</a>
+    </div>
+    
+        
+            <a class="header-right-picture " href="#about">
+        
+        
+            <img class="header-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+        
+        </a>
+    
+</header>
+
+            <!-- Define author's picture -->
+
+
+
+        
+    
+
+<nav id="sidebar" data-behavior="5">
+    <div class="sidebar-container">
+        
+            <div class="sidebar-profile">
+                <a href="/#about">
+                    <img class="sidebar-profile-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+                </a>
+                <h4 class="sidebar-profile-name">jung joongi</h4>
+                
+                    <h5 class="sidebar-profile-bio"><p>MyKtApp</p>
+</h5>
+                
+            </div>
+        
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/ " title="Home">
+                    
+                        <i class="sidebar-button-icon fa fa-home" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Home</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-categories" title="Categories">
+                    
+                        <i class="sidebar-button-icon fa fa-bookmark" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Categories</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-tags" title="Tags">
+                    
+                        <i class="sidebar-button-icon fa fa-tags" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Tags</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/all-archives" title="Archives">
+                    
+                        <i class="sidebar-button-icon fa fa-archive" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Archives</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/profile/" title="About">
+                    
+                        <i class="sidebar-button-icon fa fa-question" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">About</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="https://github.com/jungjoongi" target="_blank" rel="external nofollow noopener noreferrer" title="GitHub">
+                    
+                        <i class="sidebar-button-icon fab fa-github" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">GitHub</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="https://facebook.com/joongi.jung.kr" target="_blank" rel="external nofollow noopener noreferrer" title="Facebook">
+                    
+                        <i class="sidebar-button-icon fab fa-facebook" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Facebook</span>
+                    </a>
+            </li>
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="mailto:dev.joongi@gmail.com" target="_blank" rel="external nofollow noopener noreferrer" title="Mail">
+                    
+                        <i class="sidebar-button-icon fa fa-envelope" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">Mail</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+            <ul class="sidebar-buttons">
+            
+                <li class="sidebar-button">
+                    
+                        <a class="sidebar-button-link " href="/rss2.xml" title="RSS">
+                    
+                        <i class="sidebar-button-icon fa fa-rss" aria-hidden="true"></i>
+                        <span class="sidebar-button-desc">RSS</span>
+                    </a>
+            </li>
+            
+        </ul>
+        
+    </div>
+</nav>
+
+            
+        <div class="post-header-cover
+                    text-left
+                    " style="background-image:url('/2018/10/29/hexo-tranquilpeak-thenes-error/');" data-behavior="5">
+            
+                <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title">
+            hexo tranquilpeak 테마 build 오류 발견 및 해결
+        </h1>
+    
+    
+        <div class="post-meta">
+    <time datetime="2018-10-29T16:46:10+09:00">
+	
+		    Oct 29, 2018
+    	
+    </time>
+    
+        <span>in </span>
+        
+    <a class="category-link" href="/categories/hexo/">hexo</a>
+
+
+    
+</div>
+
+    
+</div>
+
+            
+        </div>
+
+            <div id="main" data-behavior="5" class="hasCover
+                        hasCoverMetaIn
+                        ">
+                
+<style>
+    #loading {
+        width: 100%;
+        height: 100%;
+        top: 0px;
+        left: 0px;
+        position: fixed;
+        display: block;
+        background-color: #fff;
+        z-index: 99;
+        text-align: center;
+    }
+
+    html body {
+        overflow: hidden;
+        height: 100%
+    }
+
+    #loading-image {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+    }
+    #loading-text {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        font-style: bold;
+    }
+    ol {
+        padding: 0 0 0 20px;
+        list-style: disc;
+    }
+    #coupang-layer-pop {
+        position: fixed;
+        width:386px;
+        height:345px;
+        padding:16px;
+        background-color:white;
+        border: 1px dashed#c7c7c7;
+        top:50%;
+        left: 50%;
+        transform:translate(-50%, -50%);
+        display:none;
+    }
+    #ads {
+        width:360px;
+        margin-top:30px;
+        position:absolute;
+        top:30px;
+    }
+    #content-list {
+        font-size:14px;
+        margin-bottom:20px;
+    }
+    #coupang-layer-button {
+        position: absolute;
+        right:30px;
+        bottom:10px;
+    }
+</style>
+
+<div id="loading"><img id="loading-image" src="/assets/images/loading.gif" alt="Loading..."><span id="loading-text">페이지가 로딩중입니다. 잠시만 기다려주세요</span></div>
+<article class="post">
+    
+
+    
+    <!-- 2020-02-18 쿠팡 광고제거
+    <div id="coupang-layer-pop">
+        <iframe src="https://ads-partners.coupang.com/iframe/search-bar?id=19092917192714204211009791-l1&type=l1&trackingCode=AF9416635" width="383px" height="75" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-0" src="https://coupa.ng/bgdTAw" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-1" src="https://coupa.ng/bgdTbp" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <iframe id="coupang-2" src="https://coupa.ng/bgd0rL" width="125px" height="240" frameborder="0" scrolling="no"></iframe>
+        <button id="coupang-layer-button">close</button>
+    </div> 
+    -->
+    <div class="post-content markdown" style="margin:auto;max-width:1360px;">
+
+        <div id="ads" class="ad-area">
+            
+            <!-- hexo-side1 -->
+            <ins class="adsbygoogle" style="display:block;width:340px;" data-ad-client="ca-pub-5379974693765383" data-ad-slot="6166524771" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+            <div id="content-list">
+                <h3 id="table-of-contents"></h3><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#기본적인-세팅-amp-참고"><span class="toc-text">#기본적인 세팅 &amp; 참고</span></a></li></ol><li class="toc-item toc-level-3"><a class="toc-link" href="#build-그리고-오류"><span class="toc-text"># build? 그리고 오류</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#해결방법"><span class="toc-text">#해결방법</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#이슈제기-및-마무리"><span class="toc-text">#이슈제기 및 마무리</span></a>
+            </li></div>
+            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+            <div id="lastAds"></div>
+        </div>
+
+        <div id="main-content" class="main-content-wrap" style="margin-right:360px;">
+            <p><strong>tranquilpeak 테마의 빌드이슈를 공개합니다.</strong><br>약 한달전부터 hexo 개발블로그를 개설해 공부해가고 가장 마음에 들었던 tranquilpeak테마를 적용하였지만 생각보다 까다로운 여석인지 시작부터 순탄치 않게 되었습니다. 그리고 일주일이상을 헤매다 나만 이상한건지 구글링을 해도 해결점이 나오지 않았습니다. 그리고 소스파일을 하나하나 뜯다가 테마 빌드오류가 발생했다는 사실을 깨달아 해결점과 함께 그 과정을 공개합니다.<br><a id="more"></a><br><!-- toc --></p>
+<h4 id="기본적인-세팅-amp-참고"><a href="#기본적인-세팅-amp-참고" class="headerlink" title="#기본적인 세팅 &amp; 참고"></a>#기본적인 세팅 &amp; 참고</h4><p>일단 기본적인 세팅은 <strong>tranquilpeak제작자인</strong> <a href="https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak/blob/master/DOCUMENTATION.md" rel="external nofollow noopener noreferrer" target="_blank">LouisBarranqueiro</a>의 git을 참고하면 도큐먼트 문서가 있는데 보고 따라하는것이 가장 간편하다.<br>그외에 한글로 된 설명이 필요하다면 <a href="https://taetaetae.github.io/2017/08/27/hexo-themes-tranquilpeak/" rel="external nofollow noopener noreferrer" target="_blank">태태태의 개발공간</a>을 참고해도 좋다. 잘 정리되어 있다.</p>
+<h3 id="build-그리고-오류"><a href="#build-그리고-오류" class="headerlink" title="# build? 그리고 오류"></a># build? 그리고 오류</h3><p>일단 이 테마는 build를 내부적으로 해야 작동하는 테마이다.<br>이전에 다른 테마를 사용할때에는 그냥 적용하면 됐었지만, css나 js등 테마의 자원을 변경했을때에는 별도의 build작업이 필요하다.<br><strong>그런데!!</strong> 문제가 생긴다. build가 되지 않는것이다.</p>
+<p>일단 도큐먼트 문서를 보자.</p>
+<p><img src="tranquilpeak-01.jpg" alt="도큐먼트 문서중 자원변경시 해야할일"><span class="image-caption">도큐먼트 문서중 자원변경시 해야할일</span><br>외부 라이브러리를 추가/삭제할때에는 <code>npm install</code> 을 통해서 모듈을 설치/삭제를 해주어야한다. 그렇지만 이것이 빌드는 아니다.<br><em><strong>LouisBarranqueiro</strong></em> 는 테마를 수정했을때에 <code>hexo s</code>명령어를 실행해 local환경에서 서버를 띄어보게 하고 <code>npm run start</code> 명령어를 실행하여 변경된 모듈 &amp; 자원들을 임시저장소로 옮겨 로컬환경에서 로드시키도록 했다.</p>
+<p>그렇지만 아래와 같은 오류를 반환할 뿐 아무일도 일어나지 않는다.<br><figure class="highlight"><figcaption><span>명령프롬프트에서 반환하는 값</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">npm ERR! code ELIFECYCLE</span><br><span class="line">npm ERR! errno 1</span><br><span class="line">npm ERR! hexo-theme-tranquilpeak@3.0.1 grunt: `./node_modules/grunt-cli/bin/grunt "default"`</span><br><span class="line">npm ERR! Exit status 1</span><br><span class="line">npm ERR!</span><br><span class="line">npm ERR! Failed at the hexo-theme-tranquilpeak@3.0.1 grunt script.</span><br><span class="line">npm ERR! This is probably not a problem with npm. There is likely additional logging output above.</span><br><span class="line"></span><br><span class="line">npm ERR! A complete log of this run can be found in:</span><br><span class="line">npm ERR!     C:\Users\name\scoop\persist\nodejs\cache\_logs\2018-10-29T08_21_56_667Z-debug.log</span><br><span class="line">npm ERR! code ELIFECYCLE</span><br><span class="line">npm ERR! errno 1</span><br><span class="line">npm ERR! hexo-theme-tranquilpeak@3.0.1 start: `npm run grunt -- default`</span><br><span class="line">npm ERR! Exit status 1</span><br><span class="line">npm ERR!</span><br><span class="line">npm ERR! Failed at the hexo-theme-tranquilpeak@3.0.1 start script.</span><br><span class="line">npm ERR! This is probably not a problem with npm. There is likely additional logging output above.</span><br><span class="line"></span><br><span class="line">npm ERR! A complete log of this run can be found in:</span><br><span class="line">npm ERR!     C:\Users\name\scoop\persist\nodejs\cache\_logs\2018-10-29T08_21_56_709Z-debug.log</span><br></pre></td></tr></table></figure></p>
+<p>짧은 영어탓인가 구글링을 해도 소득은 많이 않았다. 그래서 소스를 하나씩 까보기 시작했다.<br>내가 <code>npm run start</code> 를 하게되면 package.json 파일의 내장스크립트가 구동하도록 로직이 짜여져있다.</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"hexo-theme-tranquilpeak"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"3.0.1"</span>,</span><br><span class="line">  <span class="attr">"description"</span>: <span class="string">"A gorgeous responsive theme for Hexo blog framework"</span>,</span><br><span class="line">  <span class="attr">"main"</span>: <span class="string">"Gruntfile.js"</span>,</span><br><span class="line">  <span class="attr">"scripts"</span>: &#123;</span><br><span class="line">    <span class="attr">"start"</span>: <span class="string">"npm run grunt -- default"</span>,</span><br><span class="line">    <span class="attr">"build"</span>: <span class="string">"npm run prod"</span>,</span><br><span class="line">    <span class="attr">"prod"</span>: <span class="string">"npm run grunt -- buildProd"</span>,</span><br><span class="line">    <span class="attr">"grunt"</span>: <span class="string">"./node_modules/grunt-cli/bin/grunt"</span>,</span><br><span class="line">    <span class="attr">"lint"</span>: <span class="string">"./node_modules/eslint/bin/eslint.js"</span>,</span><br><span class="line">    <span class="attr">"test"</span>: <span class="string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"repository"</span>: &#123;</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"git"</span>,</span><br><span class="line">    <span class="attr">"url"</span>: <span class="string">"https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak.git"</span></span><br><span class="line">  &#125;,</span><br><span class="line">....</span><br><span class="line"> [생략]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>npm run xxx</code>라는 명령을 실행하면 상위에 미리 짜여져있는 로직이 실행이 되는것이다.<br><code>npm run start</code>명령을 하면 아마도(?) <code>Gruntfile.js</code>가 메인이되어 내부적 호출을 하는 스크립트들이 실행이 되는것같았다.<br>결국에는 <code>npm run start</code>가 <code>npm run grunt</code> 명령과 같은 셈인것 같았다.<br>그리고 이미 흐름을 보면 알겠지만 <strong>nodejs</strong>로 구동이 되고있는것을 알수가있다.</p>
+<p><code>./node_modules/grunt-cli/bin/grunt</code>의 내부소스를 봐도 js소스로 구성되어있다. (확장자가 js는 아니지만 js로 되어있다.)</p>
+<h3 id="해결방법"><a href="#해결방법" class="headerlink" title="#해결방법"></a>#해결방법</h3><p>방금 본것과 같이 nodejs가 관여하고있는 라이브러리 및 자원들이다.<br>nodejs로 서버를 실행해본 사람들은 알겠지만 실행을 하기 위해서는 앞에 <code>node</code>명령어가 필요하다는 것을 알고있을 것이다.<br>그래서 이와같이 해결해봅니다.</p>
+<figure class="highlight"><figcaption><span>package.json 9번째줄 node명령어 추가</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"hexo-theme-tranquilpeak"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"3.0.1"</span>,</span><br><span class="line">  <span class="attr">"description"</span>: <span class="string">"A gorgeous responsive theme for Hexo blog framework"</span>,</span><br><span class="line">  <span class="attr">"main"</span>: <span class="string">"Gruntfile.js"</span>,</span><br><span class="line">  <span class="attr">"scripts"</span>: &#123;</span><br><span class="line">    <span class="attr">"start"</span>: <span class="string">"npm run grunt -- default"</span>,</span><br><span class="line">    <span class="attr">"build"</span>: <span class="string">"npm run prod"</span>,</span><br><span class="line">    <span class="attr">"prod"</span>: <span class="string">"npm run grunt -- buildProd"</span>,</span><br><span class="line">    <span class="attr">"grunt"</span>: <span class="string">"node ./node_modules/grunt-cli/bin/grunt"</span>,</span><br><span class="line">    <span class="attr">"lint"</span>: <span class="string">"./node_modules/eslint/bin/eslint.js"</span>,</span><br><span class="line">    <span class="attr">"test"</span>: <span class="string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"repository"</span>: &#123;</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"git"</span>,</span><br><span class="line">    <span class="attr">"url"</span>: <span class="string">"https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak.git"</span></span><br><span class="line">  &#125;,</span><br><span class="line">....</span><br><span class="line"> [생략]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>package.json파일에 짜여져있는 로직에서 grunt파일을 실행할때 node를 통해 실행하도록 하는것이다.<br>이렇게 변경후 저장한 다음 <code>npm run start</code>명령을 실행하면 자연스레 실행이 되는것을 확인할 수 있을 것이다.<br>그리고 local서버에서는 실시간으로 적용되기때문에 확인을 할 수가 있고 자원을 변경한 후에는 <code>npm run prod</code>명령을 통하여 테마 폴더로 배포가 될것이다.<br>그러면 root폴더로 이동하여 <code>hexo generate -d</code> 명령을 수행하면 <code>public</code>폴더로 배포가 되며 블로그에 정상 배포가 되는것을 확인할 수 있을것이다.</p>
+<h3 id="이슈제기-및-마무리"><a href="#이슈제기-및-마무리" class="headerlink" title="#이슈제기 및 마무리"></a>#이슈제기 및 마무리</h3><p>나는 이것을 발견하여  <strong>tranquilpeak제작자인</strong> <a href="https://github.com/LouisBarranqueiro/hexo-theme-tranquilpeak/" rel="external nofollow noopener noreferrer" target="_blank">LouisBarranqueiro</a>의 git로가서 이슈를 제기하였다.<br><img src="tranquilpeak-02.jpg" alt="테마 제작자인 LouisBarranqueiro에게 이슈제기"><span class="image-caption">테마 제작자인 LouisBarranqueiro에게 이슈제기</span></p>
+<p>짧은 영어지만 이슈를 제기하니 1-2일 이내로 답변이 왔다. 아마 다음버전 배포할때에는 수정이 되어 배포가 될 것같다.<br>이런 이슈들을 접하다보니 나도모르게 많이 배워가는것 같다.</p>
+<p>언젠가 나도 라이브러리나 오픈소스를 배포할날이 올까? 아직 멀었지만 그런 날을 기대하며 개발을 하러간다.<br>읽어주셔 감사합니다.</p>
+
+            
+
+
+
+        </div>
+    </div>
+    <div id="post-footer" class="post-footer main-content-wrap" style="max-width:960px">
+        
+        <div class="post-footer-tags">
+            <span class="text-color-light text-small">
+                TAGGED IN</span><br>
+            
+    <a class="tag tag--primary tag--small t-link" href="/tags/hexo/">hexo</a> <a class="tag tag--primary tag--small t-link" href="/tags/tranquilpeak/">tranquilpeak</a>
+
+        </div>
+        
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/30/disqus-korean-setting/" data-tooltip="디스커스 Disqus 한글 세팅을 해보자 편법(?)으로" aria-label="PREVIOUS: 디스커스 Disqus 한글 세팅을 해보자 편법(?)으로">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/22/coding-interview-01-post/" data-tooltip="코딩인터뷰 완전분석 - I. 면접과정 (실리콘밸리 합격사례)" aria-label="NEXT: 코딩인터뷰 완전분석 - I. 면접과정 (실리콘밸리 합격사례)">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Facebook" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Twitter" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Google+" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="Table of Contents">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <!-- hexo-text -->
+        <ins class="adsbygoogle" style="display:block;margin-bottom: 10px;" data-ad-client="ca-pub-5379974693765383" data-ad-slot="8538682456" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+        
+        
+        <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+        
+    </div>
+</article>
+<script>
+    
+
+    var product;
+
+    var adsFactory = {
+        makeAds: function () {
+            var arrPul = new Array();
+
+            arrPul.push(["bebe", "https://coupa.ng/bgd96W"])
+            arrPul.push(["macbook1", "https://coupa.ng/bgdTAw"])
+            arrPul.push(["water", "https://coupa.ng/bgd97B"])
+            arrPul.push(["rice", "https://coupa.ng/bgd97L"])
+            arrPul.push(["acon", "https://coupa.ng/bgd99x"])
+            arrPul.push(["zd980", "https://coupa.ng/bgd991"])
+            arrPul.push(["macbook2", "https://coupa.ng/bgdTbp"])
+            arrPul.push(["gasubgi", "https://coupa.ng/bgd986"])
+            arrPul.push(["chaison", "https://coupa.ng/bgd99s"])
+            arrPul.push(["gx50", "https://coupa.ng/bgd99M"])
+            arrPul.push(["miband", "https://coupa.ng/bgd99d"])
+            arrPul.push(["airfry", "https://coupa.ng/bgd98G"])
+            arrPul.push(["macbook3", "https://coupa.ng/bgd0rL"])
+            arrPul.push(["joggi", "https://coupa.ng/bgd99C"])
+            arrPul.push(["gx5bk", "https://coupa.ng/bgeaab"])
+            this.shuffle(arrPul)
+            product = arrPul;
+        },
+        shuffle: function (arr) {
+            var j, x, i;
+            for (i = arr.length; i; i -= 1) {
+                j = Math.floor(Math.random() * i);
+                x = arr[i - 1];
+                arr[i - 1] = arr[j];
+                arr[j] = x;
+            }
+        },
+        popAds: function (arr) {
+            if (arr.length < 1) {
+                this.makeAds()
+                return -1;
+            }
+            return arr.pop(0)[1];
+        }
+    }
+
+    //adsFactory.makeAds(); 2020-02-18 쿠팡 광고제거
+
+    
+
+    window.onload = function () {
+        document.getElementById('loading').remove();
+    /* 2020-02-18 쿠팡 광고제거
+        for (i = 0; i < 3; i++) {
+            result = adsFactory.popAds(product)
+            if (result != -1) {
+                $("#coupang-" + i).attr("src", result)
+            }
+        }
+        setInterval(async function () {
+            var result;
+            for (i = 0; i < 3; i++) {
+                result = adsFactory.popAds(product)
+                if (result != -1) {
+                    $("#coupang-" + i).attr("src", result)
+
+                } else {
+                    i--
+                }
+            }
+        }, 10000)
+        */
+        $("#post-footer").css("margin-left", $("#main-content").offset().left)
+        $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+        
+        /* 2020-02-18 쿠팡 광고제거
+        $("#coupang-layer-button").click(function() {
+            $("#coupang-layer-pop").hide();  
+        })
+        */
+        $('html, body').css({
+            'overflow': 'auto',
+            'height': '100%'
+        });
+
+        var cursor;
+        var corverHeight = 0;
+
+        if (window.outerWidth <= 760) {
+            $("#ads").css("display", "none");
+            $("#main-content").attr("style", "");
+        }
+        if (window.outerWidth > 760) {
+            $("#ads").css("display", "block");
+            /* 2020-02-18 쿠팡 광고제거
+            setTimeout (function() {
+                $("#coupang-layer-pop").show();
+            }, 20000)
+            */
+        }
+
+        $(window).resize(function () {
+            $("#post-footer").css("margin-left", $("#main-content").offset().left)
+            var width_size = window.outerWidth;
+
+            if (width_size <= 760) {
+                $("#ads").css("display", "none");
+                $("#main-content").attr("style", "");
+            }
+            if (width_size > 760) {
+                $("#ads").css("display", "block");
+                $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+                $("#main-content").css("margin-right", "360px");
+            }
+
+        })
+        $(document).on('scroll', function () {
+            if ($(".post-header-cover").length < 1) {
+                if ($(window).scrollTop() > $(".post-header").offset().top) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $(".post-header").outerHeight(true)) {
+                        $("#ads").css("position", "fixed")
+                        $("#ads").css("top", "30px")
+                        
+                    }
+                    if ($(window).scrollTop() > $("#post-footer").offset().top -$("#ads").outerHeight(true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - $(".post-header").outerHeight(true) + 30
+                        $("#ads").css("position", "absolute")
+                        $("#ads").css("top", cursor)
+                    }
+                }
+                if ($(window).scrollTop() < $(".post-header").offset().top) {
+                    $("#ads").css("position", "absolute")
+                }
+                
+            } else {
+                
+                corverHeight = $(".post-header-cover").outerHeight(true)
+                if ($(window).scrollTop() > $("#main-content").offset().top - 30) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $("#ads").outerHeight(true)) {
+                        $("#ads").css("position", "fixed")
+                        $("#ads").css("top", "30px")
+                        
+                    }
+                    if ($(window).scrollTop() + 30 > $("#post-footer").offset().top - $("#ads").outerHeight(
+                            true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - corverHeight
+                        $("#ads").css("position", "absolute")
+                        $("#ads").css("top", cursor)
+                    }
+                }
+                if ($(window).scrollTop() < $("#main-content").offset().top - 30) {
+                    $("#ads").css("position", "absolute")
+                }
+            }
+        });
+    };
+</script>
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2020 jung joongi. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="5">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/30/disqus-korean-setting/" data-tooltip="디스커스 Disqus 한글 세팅을 해보자 편법(?)으로" aria-label="PREVIOUS: 디스커스 Disqus 한글 세팅을 해보자 편법(?)으로">
+                
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/2018/10/22/coding-interview-01-post/" data-tooltip="코딩인터뷰 완전분석 - I. 면접과정 (실리콘밸리 합격사례)" aria-label="NEXT: 코딩인터뷰 완전분석 - I. 면접과정 (실리콘밸리 합격사례)">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions" href="#btn-open-shareoptions" aria-label="Share this post">
+                <i class="fa fa-share-alt" aria-hidden="true"></i>
+            </a>
+        </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Facebook" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Twitter" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+            
+            
+            <li class="post-action hide-xs">
+                <a class="post-action-btn btn btn--default" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" title="Share on Google+" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i>
+                </a>
+            </li>
+        
+        
+            
+                <li class="post-action">
+                    <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                        <i class="fa fa-comment"></i>
+                    </a>
+                </li>
+            
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#table-of-contents" aria-label="Table of Contents">
+            
+                <i class="fa fa-list" aria-hidden="true"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="5">
+    <i id="btn-close-shareoptions" class="fa fa-times"></i>
+    <ul class="share-options">
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-facebook" aria-hidden="true"></i><span>Share on Facebook</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://twitter.com/intent/tweet?text=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-twitter" aria-hidden="true"></i><span>Share on Twitter</span>
+                </a>
+            </li>
+        
+            
+            
+            <li class="share-option">
+                <a class="share-option-btn" target="_blank" href="https://plus.google.com/share?url=https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/" rel="external nofollow noopener noreferrer">
+                    <i class="fab fa-google-plus" aria-hidden="true"></i><span>Share on Google+</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+            
+        </div>
+        
+
+
+    
+        
+    
+
+<div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-times"></i>
+        </div>
+        
+            <img id="about-card-picture" src="/assets/images/profile.jpg" alt="Author&#39;s picture">
+        
+            <h4 id="about-card-name">jung joongi</h4>
+        
+            <div id="about-card-bio"><p>MyKtApp</p>
+</div>
+        
+        
+            <div id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br>
+                <p>JAVA Backend Developer</p>
+
+            </div>
+        
+        
+            <div id="about-card-location">
+                <i class="fa fa-map-marker-alt"></i>
+                <br>
+                South.Korea
+            </div>
+        
+    </div>
+</div>
+
+        
+        
+<div id="cover" style="background-image:url('/assets/images/covers.jpg');"></div>
+        <!--SCRIPTS-->
+<script src="/assets/js/script-lkmi689h93e7n0qmtywpvpdyypvmncje7ggb5fnctvpae6wx6ssq60g6bsdf.min.js"></script>
+<!--SCRIPTS END-->
+
+    
+        <script>
+             var disqus_config = function () {
+                 this.page.url = 'https://jungjoongi.com/2018/10/29/hexo-tranquilpeak-thenes-error/';
+                 
+                    this.page.identifier = '2018/10/29/hexo-tranquilpeak-thenes-error/';
+                 
+             };
+            (function() {
+                var d = document, s = d.createElement('script');
+                var disqus_shortname = 'jungjoongi';
+                s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+            })();
+        </script>
+    
+
+
+    </body>
+</html>
