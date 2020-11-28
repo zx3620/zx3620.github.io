@@ -7052,9 +7052,9 @@ blockquote {
       width: calc(100% - 60px);
       padding: 0 30px; }
     #about #about-card #about-card-picture {
-      max-width: 82.4px;
-      max-height: 109.9px;
-      border-radius: 10%; }
+      width: 90px;
+      height: 90px;
+      border-radius: 45px; }
     #about #about-card #about-card-job {
       margin-bottom: 15px; } }
 
@@ -7062,9 +7062,9 @@ blockquote {
   #about #about-card {
     width: 80%; }
     #about #about-card #about-card-picture {
-      max-width: 82.4px;
-      max-height: 109.9px;
-      border-radius: 10%; }
+      width: 110px;
+      height: 110px;
+      border-radius: 55px; }
     #about #about-card #about-card-job,
     #about #about-card #about-card-location {
       display: inline-block;
@@ -7427,7 +7427,7 @@ blockquote {
   #sidebar .sidebar-container {
     overflow: auto; }
   #sidebar .sidebar-profile {
-    color: #ebebeb;
+    color: #616161;
     text-align: center;
     padding-top: 18px;
     margin-bottom: 15px; }
@@ -7436,7 +7436,7 @@ blockquote {
       margin: 0 auto; }
     #sidebar .sidebar-profile .sidebar-profile-name {
       font-size: 1.1em;
-      color: #ebebeb; }
+      color: #616161; }
   #sidebar ul.sidebar-buttons {
     padding: 0;
     margin: 0 0 20px 0; }
@@ -7446,12 +7446,13 @@ blockquote {
       height: 45px;
       line-height: 45px; }
       #sidebar ul.sidebar-buttons li.sidebar-button .sidebar-button-link {
-        color: #ebebeb;
+        color: #616161;
         display: block;
         height: 100%; }
         #sidebar ul.sidebar-buttons li.sidebar-button .sidebar-button-link:hover, #sidebar ul.sidebar-buttons li.sidebar-button .sidebar-button-link:active {
           text-decoration: none;
-          color: white; }
+          color: white;
+          background: #abaaaa40; }
     #sidebar ul.sidebar-buttons:first-child {
       margin-top: 5px; }
 
@@ -7464,9 +7465,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -7570,9 +7571,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -7645,9 +7646,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -7718,9 +7719,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-picture, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-name, #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -7811,7 +7812,7 @@ blockquote {
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-location {
         font-weight: 400;
         font-size: 1.6rem;
-        color: #ebebeb; }
+        color: #616161; }
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-job,
       #sidebar[data-behavior="1"] .sidebar-profile .sidebar-profile-location {
         margin-top: 0;
@@ -7863,9 +7864,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="2"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -7954,7 +7955,7 @@ blockquote {
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-location {
         font-weight: 400;
         font-size: 1.6rem;
-        color: #ebebeb; }
+        color: #616161; }
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-job,
       #sidebar[data-behavior="4"] .sidebar-profile .sidebar-profile-location {
         margin-top: 0;
@@ -8007,9 +8008,9 @@ blockquote {
       padding-top: 40px;
       padding-bottom: 7.5px; }
       #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-picture {
-        max-width: 82.4px;
-        max-height: 109.9px;
-        border-radius: 10%;
+        width: 90px;
+        height: 90px;
+        border-radius: 90px;
         margin-bottom: 5px; }
       #sidebar[data-behavior="5"] .sidebar-profile .sidebar-profile-name {
         font-size: 1.6rem; }
@@ -10063,3 +10064,66 @@ figure.highlight,
 
 }
 */
+.coupang-ads {
+  max-width: 340px;
+  cursor: pointer;
+  position: relative; }
+
+#coupang-title {
+  text-align: center;
+  margin-top: 0px;
+  border: 2px;
+  border-style: solid;
+  border-bottom: 0;
+  border-color: gray;
+  font-size: 1.5rem;
+  -webkit-transition: width 0.5s, height 0.5s, background-color 0.5s, -webkit-transform 0.5s;
+  transition: width 0.5s, height 0.5s, background-color 0.5s, transform 0.5s; }
+
+.coupang-ads:hover > #coupang-title {
+  background: #325a75; }
+
+#coupang-search {
+  max-width: 320px;
+  padding-top: 10px; }
+
+#coupang-title-icon {
+  position: absolute;
+  background-color: #ff5555;
+  color: white;
+  padding: 2px;
+  top: 0;
+  animation: coupang-title-icon 1s linear infinite;
+  -webkit-animation: coupang-title-icon 1s linear infinite; }
+
+@keyframes coupang-title-icon {
+  0% { }
+  100% {
+    padding-left: 10px;
+    padding-right: 10px; } }
+
+.ads-wrap {
+  border: 2px;
+  border-style: solid; }
+
+.ads-wrap-first {
+  margin-bottom: -2px; }
+
+.ads-wrap-first:hover > #ads-first-name {
+  background-color: #ff6b6b; }
+
+.ads-wrap-second:hover > #ads-second-name {
+  background-color: #ff6b6b; }
+
+.ads-wrap p {
+  text-align: center;
+  background: #ececec;
+  width: 100%;
+  margin-top: 0px;
+  font-size: 1.4rem;
+  background-color: #ff9393;
+  color: white; }
+
+#coupang-notice {
+  font-size: 10px;
+  text-align: center; }

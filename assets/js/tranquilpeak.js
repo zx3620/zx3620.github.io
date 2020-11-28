@@ -722,89 +722,280 @@
     }
   });
 })(jQuery);
-;(function($) {
-  'use strict';
+;(function ($) {
+    'use strict';
 
-  // Hide the post bottom bar when the post footer is visible by the user,
-  // and show it when the post footer isn't visible by the user
-
-  /**
-   * PostBottomBar
-   * @constructor
-   */
-  var PostBottomBar = function() {
-    this.$postBottomBar = $('.post-bottom-bar');
-    this.$postFooter = $('.post-actions-wrap');
-    this.$header = $('#header');
-    this.delta = 15;
-    this.lastScrollTop = 0;
-    this.lastScrollDownPos = 0;
-    this.lastScrollUpPos = 0;
-  };
-
-  PostBottomBar.prototype = {
+    // Hide the post bottom bar when the post footer is visible by the user,
+    // and show it when the post footer isn't visible by the user
 
     /**
-     * Run PostBottomBar feature
-     * @return {void}
+     * PostBottomBar
+     * @constructor
      */
-    run: function() {
-      var self = this;
-      var didScroll;
-      // Run animation for first time
-      self.swipePostBottomBar();
-      // Detects if the user is scrolling
-      $(window).scroll(function() {
-        didScroll = true;
-      });
-      // Check if the user scrolled every 250 milliseconds
-      setInterval(function() {
-        if (didScroll) {
-          self.swipePostBottomBar();
-          didScroll = false;
+    var PostBottomBar = function () {
+        this.$postBottomBar = $('.post-bottom-bar');
+        this.$postFooter = $('.post-actions-wrap');
+        this.$header = $('#header');
+        this.delta = 15;
+        this.lastScrollTop = 0;
+        this.lastScrollDownPos = 0;
+        this.lastScrollUpPos = 0;
+    };
+
+    PostBottomBar.prototype = {
+
+        /**
+         * Run PostBottomBar feature
+         * @return {void}
+         */
+        run: function () {
+            var self = this;
+            var didScroll;
+            // Run animation for first time
+            self.swipePostBottomBar();
+            // Detects if the user is scrolling
+            $(window).scroll(function () {
+                didScroll = true;
+            });
+            // Check if the user scrolled every 250 milliseconds
+            setInterval(function () {
+                if (didScroll) {
+                    self.swipePostBottomBar();
+                    didScroll = false;
+                }
+            }, 250);
+
+
+            /// custom
+            adsFactory.makeAds();
+            customAdFn();
+        },
+
+        /**
+         * Swipe the post bottom bar
+         * @return {void}
+         */
+        swipePostBottomBar: function () {
+            var scrollTop = $(window).scrollTop();
+            var postFooterOffsetTop = this.$postFooter.offset().top;
+
+            // scrolling up
+            if (this.lastScrollTop > scrollTop) {
+                // show bottom bar
+                // if the user scrolled upwards more than `delta`
+                // and `post-footer` div isn't visible
+                if (Math.abs(this.lastScrollDownPos - scrollTop) > this.delta &&
+                    (postFooterOffsetTop + this.$postFooter.height() > scrollTop + $(window).height() ||
+                        postFooterOffsetTop < scrollTop + this.$header.height())) {
+                    this.$postBottomBar.slideDown();
+                    this.lastScrollUpPos = scrollTop;
+                }
+            }
+
+            // scrolling down
+            if (scrollTop > this.lastScrollUpPos + this.delta) {
+                this.$postBottomBar.slideUp();
+                this.lastScrollDownPos = scrollTop;
+            }
+
+            this.lastScrollTop = scrollTop;
         }
-      }, 250);
-    },
+    };
 
-    /**
-     * Swipe the post bottom bar
-     * @return {void}
-     */
-    swipePostBottomBar: function() {
-      var scrollTop = $(window).scrollTop();
-      var postFooterOffsetTop = this.$postFooter.offset().top;
 
-      // scrolling up
-      if (this.lastScrollTop > scrollTop) {
-        // show bottom bar
-        // if the user scrolled upwards more than `delta`
-        // and `post-footer` div isn't visible
-        if (Math.abs(this.lastScrollDownPos - scrollTop) > this.delta &&
-          (postFooterOffsetTop + this.$postFooter.height() > scrollTop + $(window).height() ||
-            postFooterOffsetTop < scrollTop + this.$header.height())) {
-          this.$postBottomBar.slideDown();
-          this.lastScrollUpPos = scrollTop;
+    var adsFactory = {
+        ads: null,
+        product: new Array(),
+        makeAds: function () {
+            var arrPul = new Array();
+
+            if (adsFactory.ads == null) {
+                $.getJSON("/coupang/1016.json", function (data) {
+                    adsFactory.ads = data.data;
+                });
+            }
+
+            $.each(adsFactory.ads, function (index, item) {
+                arrPul.push([item.productName, item.productImage, item.productUrl])
+            });
+
+            this.product = this.shuffle(arrPul);
+
+        },
+        shuffle: function (arr) {
+            var j, x, i;
+            for (i = arr.length; i; i -= 1) {
+                j = Math.floor(Math.random() * i);
+                x = arr[i - 1];
+                arr[i - 1] = arr[j];
+                arr[j] = x;
+            }
+            return arr;
+        },
+        popAds: function () {
+
+            if (this.product.length < 1) {
+                this.makeAds();
+                return -1;
+            }
+            let pop = this.product.pop();
+            let letAdInfo = {
+                "name": pop[0],
+                "image": pop[1],
+                "url": pop[2]
+            }
+            return letAdInfo;
         }
-      }
-
-      // scrolling down
-      if (scrollTop > this.lastScrollUpPos + this.delta) {
-        this.$postBottomBar.slideUp();
-        this.lastScrollDownPos = scrollTop;
-      }
-
-      this.lastScrollTop = scrollTop;
     }
-  };
 
-  $(document).ready(function() {
-    if ($('.post-bottom-bar').length) {
-      var postBottomBar = new PostBottomBar();
-      postBottomBar.run();
-    }
-  });
-})(jQuery);
-;(function($) {
+    //2020-02-18 쿠팡 광고
+
+    $(document).ready(function () {
+        document.getElementById('loading').remove();
+    });
+
+    function customAdFn() {
+        //2020-02-18 쿠팡 광고
+        let result;
+
+        let firstAds = setInterval(async function () {
+            for (let i = 0; i < 2; i++) {
+                result = adsFactory.popAds(adsFactory.product)
+                if (result != -1) {
+                    if (i == 0) {
+                        $("#ads-first-name").html(result.name);
+                        $(".ads-wrap-first img").attr("src", result.image);
+                        $(".ads-wrap-first").data("url", result.url);
+                    } else {
+                        $("#ads-second-name").html(result.name);
+                        $(".ads-wrap-second img").attr("src", result.image);
+                        $(".ads-wrap-second").data("url", result.url);
+                    }
+
+                    clearInterval(firstAds);
+
+                } else {
+                    i--
+                }
+            }
+        }, 500);
+        setInterval(async function () {
+
+            for (let i = 0; i < 2; i++) {
+                result = adsFactory.popAds(adsFactory.product)
+                if (result != -1) {
+                    if (i == 0) {
+                        $("#ads-first-name").html(result.name);
+                        $(".ads-wrap-first img").attr("src", result.image);
+                        $(".ads-wrap-first").data("url", result.url);
+                    } else {
+                        $("#ads-second-name").html(result.name);
+                        $(".ads-wrap-second img").attr("src", result.image);
+                        $(".ads-wrap-second").data("url", result.url);
+                    }
+
+                } else {
+                    i--
+                }
+            }
+        }, 13000);
+        $("#post-footer").css("margin-left", $("#main-content").offset().left);
+        $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+
+        /* 2020-02-18 쿠팡 광고 */
+        $("#coupang-layer-button").click(function () {
+            $("#coupang-layer-pop").hide();
+        });
+        $('html, body').css({
+            'overflow': 'auto',
+            'height': '100%'
+        });
+
+        var cursor;
+        var corverHeight = 0;
+
+        if (window.outerWidth <= 760) {
+            $("#ads").css("display", "none");
+            $("#main-content").attr("style", "");
+        }
+        if (window.outerWidth > 760) {
+            $("#ads").css("display", "block");
+            /* 2020-02-18 쿠팡 광고 */
+            // setTimeout (function() {
+            //     $("#coupang-layer-pop").show();
+            // }, 20000)
+        }
+
+        $(window).resize(function () {
+            $("#post-footer").css("margin-left", $("#main-content").offset().left);
+            var width_size = window.outerWidth;
+
+            if (width_size <= 760) {
+                $("#ads").css("display", "none");
+                $("#main-content").attr("style", "");
+            }
+            if (width_size > 760) {
+                $("#ads").css("display", "block");
+                $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
+                $("#main-content").css("margin-right", "360px");
+            }
+
+        })
+        $(document).on('scroll', function () {
+            if ($(".post-header-cover").length < 1) {
+                if ($(window).scrollTop() > $(".post-header").offset().top) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $(".post-header").outerHeight(true)) {
+                        $("#ads").css("position", "fixed");
+                        $("#ads").css("top", "30px");
+
+                    }
+                    if ($(window).scrollTop() > $("#post-footer").offset().top - $("#ads").outerHeight(true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - $(".post-header").outerHeight(true) + 30
+                        $("#ads").css("position", "absolute");
+                        $("#ads").css("top", cursor);
+                    }
+                }
+                if ($(window).scrollTop() < $(".post-header").offset().top) {
+                    $("#ads").css("position", "absolute");
+                }
+
+            } else {
+
+                corverHeight = $(".post-header-cover").outerHeight(true)
+                if ($(window).scrollTop() > $("#main-content").offset().top - 30) {
+                    if ($(window).scrollTop() < $("#post-footer").offset().top + $("#ads").outerHeight(true)) {
+                        $("#ads").css("position", "fixed");
+                        $("#ads").css("top", "30px");
+
+                    }
+                    if ($(window).scrollTop() + 30 > $("#post-footer").offset().top - $("#ads").outerHeight(
+                            true)) {
+                        cursor = $("#post-footer").offset().top - $("#ads").outerHeight(true) - corverHeight
+                        $("#ads").css("position", "absolute");
+                        $("#ads").css("top", cursor);
+                    }
+                }
+                if ($(window).scrollTop() < $("#main-content").offset().top - 30) {
+                    $("#ads").css("position", "absolute");
+                }
+            }
+        });
+
+        $(".ads-wrap").click(function () {
+            window.open($(this).data("url"));
+        })
+    };
+
+    //////////////
+
+
+    $(document).ready(function () {
+        if ($('.post-bottom-bar').length) {
+            var postBottomBar = new PostBottomBar();
+            postBottomBar.run();
+        }
+    });
+})(jQuery);;(function($) {
   'use strict';
 
   /**
