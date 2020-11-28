@@ -16537,6 +16537,9 @@ return jQuery;
             /// custom
             adsFactory.makeAds();
             customAdFn();
+            $(document).ready(function () {
+                document.getElementById('loading').remove();
+            });
         },
 
         /**
@@ -16618,9 +16621,7 @@ return jQuery;
 
     //2020-02-18 쿠팡 광고
 
-    $(document).ready(function () {
-        document.getElementById('loading').remove();
-    });
+
 
     function customAdFn() {
         //2020-02-18 쿠팡 광고
