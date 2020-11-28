@@ -764,14 +764,6 @@
                     didScroll = false;
                 }
             }, 250);
-
-
-            /// custom
-            adsFactory.makeAds();
-            customAdFn();
-            $(document).ready(function () {
-                document.getElementById('loading').remove();
-            });
         },
 
         /**
@@ -805,10 +797,9 @@
         }
     };
 
-
     var adsFactory = {
         ads: null,
-        product: new Array(),
+        product: null,
         makeAds: function () {
             var arrPul = new Array();
 
@@ -819,10 +810,10 @@
             }
 
             $.each(adsFactory.ads, function (index, item) {
-                arrPul.push([item.productName, item.productImage, item.productUrl])
+                arrPul.push([item.productName, item.productImage, item.productUrl]);
             });
 
-            this.product = this.shuffle(arrPul);
+            adsFactory.product = adsFactory.shuffle(arrPul);
 
         },
         shuffle: function (arr) {
@@ -837,69 +828,63 @@
         },
         popAds: function () {
 
-            if (this.product.length < 1) {
-                this.makeAds();
-                return -1;
+            if (adsFactory.product == null || adsFactory.product.length < 1) {
+                adsFactory.makeAds();
             }
-            let pop = this.product.pop();
-            let letAdInfo = {
+
+            var pop = adsFactory.product.pop();
+            var adInfo = {
                 "name": pop[0],
                 "image": pop[1],
                 "url": pop[2]
             }
-            return letAdInfo;
+            return adInfo;
         }
     }
 
+
     //2020-02-18 쿠팡 광고
 
-
-
     function customAdFn() {
+
+        var prodText = "<span class='prod-text'>오늘의 추천상품</span>";
+
         //2020-02-18 쿠팡 광고
-        let result;
-
-        let firstAds = setInterval(async function () {
-            for (let i = 0; i < 2; i++) {
-                result = adsFactory.popAds(adsFactory.product)
-                if (result != -1) {
+        var firstAds = setInterval(function () {
+            for (var i = 0; i < 2; i++) {
+                var result1 = adsFactory.popAds(adsFactory.product);
+                if (result1 != null && result1 != -1) {
                     if (i == 0) {
-                        $("#ads-first-name").html(result.name);
-                        $(".ads-wrap-first img").attr("src", result.image);
-                        $(".ads-wrap-first").data("url", result.url);
+                        $("#ads-first-name").html(prodText + result1.name);
+                        $(".ads-wrap-first img").attr("src", result1.image);
+                        $(".ads-wrap-first").data("url", result1.url);
                     } else {
-                        $("#ads-second-name").html(result.name);
-                        $(".ads-wrap-second img").attr("src", result.image);
-                        $(".ads-wrap-second").data("url", result.url);
+                        $("#ads-second-name").html(prodText + result1.name);
+                        $(".ads-wrap-second img").attr("src", result1.image);
+                        $(".ads-wrap-second").data("url", result1.url);
                     }
-
                     clearInterval(firstAds);
-
-                } else {
-                    i--
                 }
             }
         }, 500);
-        setInterval(async function () {
+        var loopAds = setInterval(function () {
 
-            for (let i = 0; i < 2; i++) {
-                result = adsFactory.popAds(adsFactory.product)
-                if (result != -1) {
+            for (var i = 0; i < 2; i++) {
+                var result2 = adsFactory.popAds(adsFactory.product)
+                if (result2 != -1) {
                     if (i == 0) {
-                        $("#ads-first-name").html(result.name);
-                        $(".ads-wrap-first img").attr("src", result.image);
-                        $(".ads-wrap-first").data("url", result.url);
+                        $("#ads-first-name").html(prodText + result2.name);
+                        $(".ads-wrap-first img").attr("src", result2.image);
+                        $(".ads-wrap-first").data("url", result2.url);
                     } else {
-                        $("#ads-second-name").html(result.name);
-                        $(".ads-wrap-second img").attr("src", result.image);
-                        $(".ads-wrap-second").data("url", result.url);
+                        $("#ads-second-name").html(prodText + result2.name);
+                        $(".ads-wrap-second img").attr("src", result2.image);
+                        $(".ads-wrap-second").data("url", result2.url);
                     }
 
-                } else {
-                    i--
                 }
             }
-        }, 13000);
+        }, 12000);
         $("#post-footer").css("margin-left", $("#main-content").offset().left);
         $("#ads").css("left", $("#main-content").outerWidth() + $("#main-content").offset().left);
 
@@ -994,6 +979,9 @@
         if ($('.post-bottom-bar').length) {
             var postBottomBar = new PostBottomBar();
             postBottomBar.run();
+            adsFactory.makeAds();
+            customAdFn();
+            $('#loading').remove();
         }
     });
 })(jQuery);;(function($) {
