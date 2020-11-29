@@ -16572,7 +16572,7 @@ return jQuery;
             var arrPul = new Array();
 
             if (adsFactory.ads == null) {
-                $.getJSON("/coupang/1016.json", function (data) {
+                $.getJSON("/json/coupang/jungjoongi/1016.json", function (data) {
                     adsFactory.ads = data.data;
                 });
             }
