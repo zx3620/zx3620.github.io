@@ -8,6 +8,22 @@
     </url>
 
     <url>
+        <loc>https://jungjoongi.com/2020/12/11/disaus-korean-setting2/</loc>
+        <lastmod>2020-12-11T01:29:57.523Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://jungjoongi.com/2018/10/30/disqus-korean-setting/</loc>
+        <lastmod>2020-12-11T01:19:40.048Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>https://jungjoongi.com/2020/11/29/airpods-pro-program/</loc>
         <lastmod>2020-11-29T05:41:29.364Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -34,14 +50,6 @@
     <url>
         <loc>https://jungjoongi.com/2018/12/05/hexo-adsense/</loc>
         <lastmod>2020-11-25T22:05:00.904Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
-        <loc>https://jungjoongi.com/2018/10/30/disqus-korean-setting/</loc>
-        <lastmod>2020-11-25T22:05:00.879Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
